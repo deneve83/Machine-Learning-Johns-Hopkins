@@ -57,12 +57,12 @@ download.file(quizUrl,quizFilename)
 
 I inspected the data in excel and found a lot of NA, divide by zero, and blank values in the data. So I removed these values.
 ```{R Model 1, cache = TRUE}
-training.df     <-read.csv(trainingFilename, #na.strings=c("NA","","#DIV/0!"))
+training.df     <-read.csv(trainingFilename, na.strings=c("NA","","#DIV/0!"))
 training.df     <-training.df[,colSums(is.na(training.df)) == 0]
-dim(training.df) #;head(training.df,3)
-quiz.df         <-read.csv(quizFilename , na.strings=c("NA", "", #"#DIV/0!"))
+dim(training.df) ;head(training.df,3)
+quiz.df         <-read.csv(quizFilename , na.strings=c("NA", "", "#DIV/0!"))
 quiz.df         <-quiz.df[,colSums(is.na(quiz.df)) == 0]
-dim(quiz.df) #;head(quiz.df,3)
+dim(quiz.df) ;head(quiz.df,3)
 ```
 
 ##Reduce The number of variables and look for near-zero values in training set
@@ -114,7 +114,7 @@ if (!file.exists(myModelFilename)) {
     save(myModel, file = "myModel.RData")
 
     stopCluster(ncores)
-}# else {
+} else {
     # Use cached model  
 load(file = myModelFilename, verbose = TRUE)
 }
