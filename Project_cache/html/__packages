@@ -4,3 +4,6 @@ lattice
 caret
 randomForest
 e1071
+foreach
+iterators
+doParallel

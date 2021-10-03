@@ -183,88 +183,305 @@ pre code {
 #install.packages(&quot;randomForest&quot;)
 #install.packages(&quot;e1071&quot;)
 #install.packages(&quot;caret&quot;)
-#library(&quot;doParallel&quot;)
-#library(&quot;randomForest&quot;)
-#library(&quot;e1071&quot;)
-#library(&quot;caret&quot;)
+library(&quot;doParallel&quot;)</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## Loading required package: iterators</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
+<pre class="r"><code>library(&quot;randomForest&quot;)
+library(&quot;e1071&quot;)
+library(&quot;caret&quot;)
 suppressWarnings(suppressMessages(library(caret)))
 suppressWarnings(suppressMessages(library(randomForest)))
 suppressWarnings(suppressMessages(library(e1071)))
 
-#trainingFilename   &lt;- &#39;pml-training.csv&#39;
-#quizFilename       &lt;- &#39;pml-testing.csv&#39;
-#trainingUrl        &lt;- &#39;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&#39;
-#quizUrl            &lt;- &#39;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&#39;
+trainingFilename   &lt;- &#39;pml-training.csv&#39;
+quizFilename       &lt;- &#39;pml-testing.csv&#39;
+trainingUrl        &lt;- &#39;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&#39;
+quizUrl            &lt;- &#39;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&#39;
 
-#download.file(trainingUrl, trainingFilename)
-#download.file(quizUrl,quizFilename)</code></pre>
+download.file(trainingUrl, trainingFilename)
+download.file(quizUrl,quizFilename)</code></pre>
 <p>###Data Cleansing</p>
 <p>I inspected the data in excel and found a lot of NA, divide by zero, and blank values in the data. So I removed these values.</p>
-<pre class="r"><code>#training.df     &lt;-read.csv(trainingFilename, #na.strings=c(&quot;NA&quot;,&quot;&quot;,&quot;#DIV/0!&quot;))
-#training.df     &lt;-training.df[,colSums(is.na(training.df)) == 0]
-#dim(training.df) #;head(training.df,3)
-#quiz.df         &lt;-read.csv(quizFilename , na.strings=c(&quot;NA&quot;, &quot;&quot;, #&quot;#DIV/0!&quot;))
-#quiz.df         &lt;-quiz.df[,colSums(is.na(quiz.df)) == 0]
-#dim(quiz.df) #;head(quiz.df,3)</code></pre>
+<pre class="r"><code>training.df     &lt;-read.csv(trainingFilename, na.strings=c(&quot;NA&quot;,&quot;&quot;,&quot;#DIV/0!&quot;))
+training.df     &lt;-training.df[,colSums(is.na(training.df)) == 0]
+dim(training.df) ;head(training.df,3)</code></pre>
+<pre><code>## [1] 19622    60</code></pre>
+<pre><code>##   X user_name raw_timestamp_part_1 raw_timestamp_part_2   cvtd_timestamp
+## 1 1  carlitos           1323084231               788290 05/12/2011 11:23
+## 2 2  carlitos           1323084231               808298 05/12/2011 11:23
+## 3 3  carlitos           1323084231               820366 05/12/2011 11:23
+##   new_window num_window roll_belt pitch_belt yaw_belt total_accel_belt
+## 1         no         11      1.41       8.07    -94.4                3
+## 2         no         11      1.41       8.07    -94.4                3
+## 3         no         11      1.42       8.07    -94.4                3
+##   gyros_belt_x gyros_belt_y gyros_belt_z accel_belt_x accel_belt_y accel_belt_z
+## 1         0.00            0        -0.02          -21            4           22
+## 2         0.02            0        -0.02          -22            4           22
+## 3         0.00            0        -0.02          -20            5           23
+##   magnet_belt_x magnet_belt_y magnet_belt_z roll_arm pitch_arm yaw_arm
+## 1            -3           599          -313     -128      22.5    -161
+## 2            -7           608          -311     -128      22.5    -161
+## 3            -2           600          -305     -128      22.5    -161
+##   total_accel_arm gyros_arm_x gyros_arm_y gyros_arm_z accel_arm_x accel_arm_y
+## 1              34        0.00        0.00       -0.02        -288         109
+## 2              34        0.02       -0.02       -0.02        -290         110
+## 3              34        0.02       -0.02       -0.02        -289         110
+##   accel_arm_z magnet_arm_x magnet_arm_y magnet_arm_z roll_dumbbell
+## 1        -123         -368          337          516      13.05217
+## 2        -125         -369          337          513      13.13074
+## 3        -126         -368          344          513      12.85075
+##   pitch_dumbbell yaw_dumbbell total_accel_dumbbell gyros_dumbbell_x
+## 1      -70.49400    -84.87394                   37                0
+## 2      -70.63751    -84.71065                   37                0
+## 3      -70.27812    -85.14078                   37                0
+##   gyros_dumbbell_y gyros_dumbbell_z accel_dumbbell_x accel_dumbbell_y
+## 1            -0.02                0             -234               47
+## 2            -0.02                0             -233               47
+## 3            -0.02                0             -232               46
+##   accel_dumbbell_z magnet_dumbbell_x magnet_dumbbell_y magnet_dumbbell_z
+## 1             -271              -559               293               -65
+## 2             -269              -555               296               -64
+## 3             -270              -561               298               -63
+##   roll_forearm pitch_forearm yaw_forearm total_accel_forearm gyros_forearm_x
+## 1         28.4         -63.9        -153                  36            0.03
+## 2         28.3         -63.9        -153                  36            0.02
+## 3         28.3         -63.9        -152                  36            0.03
+##   gyros_forearm_y gyros_forearm_z accel_forearm_x accel_forearm_y
+## 1            0.00           -0.02             192             203
+## 2            0.00           -0.02             192             203
+## 3           -0.02            0.00             196             204
+##   accel_forearm_z magnet_forearm_x magnet_forearm_y magnet_forearm_z classe
+## 1            -215              -17              654              476      A
+## 2            -216              -18              661              473      A
+## 3            -213              -18              658              469      A</code></pre>
+<pre class="r"><code>quiz.df         &lt;-read.csv(quizFilename , na.strings=c(&quot;NA&quot;, &quot;&quot;, &quot;#DIV/0!&quot;))
+quiz.df         &lt;-quiz.df[,colSums(is.na(quiz.df)) == 0]
+dim(quiz.df) ;head(quiz.df,3)</code></pre>
+<pre><code>## [1] 20 60</code></pre>
+<pre><code>##   X user_name raw_timestamp_part_1 raw_timestamp_part_2   cvtd_timestamp
+## 1 1     pedro           1323095002               868349 05/12/2011 14:23
+## 2 2    jeremy           1322673067               778725 30/11/2011 17:11
+## 3 3    jeremy           1322673075               342967 30/11/2011 17:11
+##   new_window num_window roll_belt pitch_belt yaw_belt total_accel_belt
+## 1         no         74    123.00      27.00    -4.75               20
+## 2         no        431      1.02       4.87   -88.90                4
+## 3         no        439      0.87       1.82   -88.50                5
+##   gyros_belt_x gyros_belt_y gyros_belt_z accel_belt_x accel_belt_y accel_belt_z
+## 1        -0.50        -0.02        -0.46          -38           69         -179
+## 2        -0.06        -0.02        -0.07          -13           11           39
+## 3         0.05         0.02         0.03            1           -1           49
+##   magnet_belt_x magnet_belt_y magnet_belt_z roll_arm pitch_arm yaw_arm
+## 1           -13           581          -382     40.7     -27.8     178
+## 2            43           636          -309      0.0       0.0       0
+## 3            29           631          -312      0.0       0.0       0
+##   total_accel_arm gyros_arm_x gyros_arm_y gyros_arm_z accel_arm_x accel_arm_y
+## 1              10       -1.65        0.48       -0.18          16          38
+## 2              38       -1.17        0.85       -0.43        -290         215
+## 3              44        2.10       -1.36        1.13        -341         245
+##   accel_arm_z magnet_arm_x magnet_arm_y magnet_arm_z roll_dumbbell
+## 1          93         -326          385          481     -17.73748
+## 2         -90         -325          447          434      54.47761
+## 3         -87         -264          474          413      57.07031
+##   pitch_dumbbell yaw_dumbbell total_accel_dumbbell gyros_dumbbell_x
+## 1       24.96085    126.23596                    9             0.64
+## 2      -53.69758    -75.51480                   31             0.34
+## 3      -51.37303    -75.20287                   29             0.39
+##   gyros_dumbbell_y gyros_dumbbell_z accel_dumbbell_x accel_dumbbell_y
+## 1             0.06            -0.61               21              -15
+## 2             0.05            -0.71             -153              155
+## 3             0.14            -0.34             -141              155
+##   accel_dumbbell_z magnet_dumbbell_x magnet_dumbbell_y magnet_dumbbell_z
+## 1               81               523              -528               -56
+## 2             -205              -502               388               -36
+## 3             -196              -506               349                41
+##   roll_forearm pitch_forearm yaw_forearm total_accel_forearm gyros_forearm_x
+## 1          141          49.3         156                  33            0.74
+## 2          109         -17.6         106                  39            1.12
+## 3          131         -32.6          93                  34            0.18
+##   gyros_forearm_y gyros_forearm_z accel_forearm_x accel_forearm_y
+## 1           -3.34           -0.59            -110             267
+## 2           -2.78           -0.18             212             297
+## 3           -0.79            0.28             154             271
+##   accel_forearm_z magnet_forearm_x magnet_forearm_y magnet_forearm_z problem_id
+## 1            -149             -714              419              617          1
+## 2            -118             -237              791              873          2
+## 3            -129              -51              698              783          3</code></pre>
 <p>##Reduce The number of variables and look for near-zero values in training set</p>
 <p>I then went abbout removing the non-predictors from the training set. These include the index, subject name, time, and window variables.</p>
-<pre class="r"><code>#Training.df   &lt;-training.df[,-c(1:7)]
-#Quiz.df &lt;-quiz.df[,-c(1:7)]
-#dim(Training.df)
-#Training.nzv&lt;-nzv(Training.df[,-ncol(Training.df)],saveMetrics=TRUE)
-#rownames(Training.nzv)
-#dim(Training.nzv)[1]</code></pre>
+<pre class="r"><code>Training.df   &lt;-training.df[,-c(1:7)]
+Quiz.df &lt;-quiz.df[,-c(1:7)]
+dim(Training.df)</code></pre>
+<pre><code>## [1] 19622    53</code></pre>
+<pre class="r"><code>Training.nzv&lt;-nzv(Training.df[,-ncol(Training.df)],saveMetrics=TRUE)
+rownames(Training.nzv)</code></pre>
+<pre><code>##  [1] &quot;roll_belt&quot;            &quot;pitch_belt&quot;           &quot;yaw_belt&quot;            
+##  [4] &quot;total_accel_belt&quot;     &quot;gyros_belt_x&quot;         &quot;gyros_belt_y&quot;        
+##  [7] &quot;gyros_belt_z&quot;         &quot;accel_belt_x&quot;         &quot;accel_belt_y&quot;        
+## [10] &quot;accel_belt_z&quot;         &quot;magnet_belt_x&quot;        &quot;magnet_belt_y&quot;       
+## [13] &quot;magnet_belt_z&quot;        &quot;roll_arm&quot;             &quot;pitch_arm&quot;           
+## [16] &quot;yaw_arm&quot;              &quot;total_accel_arm&quot;      &quot;gyros_arm_x&quot;         
+## [19] &quot;gyros_arm_y&quot;          &quot;gyros_arm_z&quot;          &quot;accel_arm_x&quot;         
+## [22] &quot;accel_arm_y&quot;          &quot;accel_arm_z&quot;          &quot;magnet_arm_x&quot;        
+## [25] &quot;magnet_arm_y&quot;         &quot;magnet_arm_z&quot;         &quot;roll_dumbbell&quot;       
+## [28] &quot;pitch_dumbbell&quot;       &quot;yaw_dumbbell&quot;         &quot;total_accel_dumbbell&quot;
+## [31] &quot;gyros_dumbbell_x&quot;     &quot;gyros_dumbbell_y&quot;     &quot;gyros_dumbbell_z&quot;    
+## [34] &quot;accel_dumbbell_x&quot;     &quot;accel_dumbbell_y&quot;     &quot;accel_dumbbell_z&quot;    
+## [37] &quot;magnet_dumbbell_x&quot;    &quot;magnet_dumbbell_y&quot;    &quot;magnet_dumbbell_z&quot;   
+## [40] &quot;roll_forearm&quot;         &quot;pitch_forearm&quot;        &quot;yaw_forearm&quot;         
+## [43] &quot;total_accel_forearm&quot;  &quot;gyros_forearm_x&quot;      &quot;gyros_forearm_y&quot;     
+## [46] &quot;gyros_forearm_z&quot;      &quot;accel_forearm_x&quot;      &quot;accel_forearm_y&quot;     
+## [49] &quot;accel_forearm_z&quot;      &quot;magnet_forearm_x&quot;     &quot;magnet_forearm_y&quot;    
+## [52] &quot;magnet_forearm_z&quot;</code></pre>
+<pre class="r"><code>dim(Training.nzv)[1]</code></pre>
+<pre><code>## [1] 52</code></pre>
 </div>
 <div id="develop-an-algorithm-by-partitioning-the-training-data-into-a-training-and-then-a-testvalidation-set." class="section level1">
 <h1>Develop an algorithm by partitioning the training data into a training and then a test/validation set.</h1>
-<pre class="r"><code>#inTrain     &lt;- createDataPartition(Training.df$classe, p = 0.6, list = FALSE)
-#inTraining  &lt;- Training.df[inTrain,]
-#inTest      &lt;- Training.df[-inTrain,]
-#dim(inTraining);dim(inTest)
-#
-# myModelFilename &lt;- &quot;myModel.RData&quot;
-#if (!file.exists(myModelFilename)) {
-#
-#    # Parallel cores  
-#    #require(parallel)
-#    library(doParallel)
-#    ncores &lt;- makeCluster(detectCores() - 1)
-#    registerDoParallel(cores=ncores)
-#    getDoParWorkers() # 3    
+<pre class="r"><code>inTrain     &lt;- createDataPartition(Training.df$classe, p = 0.6, list = FALSE)
+inTraining  &lt;- Training.df[inTrain,]
+inTest      &lt;- Training.df[-inTrain,]
+dim(inTraining);dim(inTest)</code></pre>
+<pre><code>## [1] 11776    53</code></pre>
+<pre><code>## [1] 7846   53</code></pre>
+<pre class="r"><code> myModelFilename &lt;- &quot;myModel.RData&quot;
+if (!file.exists(myModelFilename)) {
+
+    # Parallel cores  
+    #require(parallel)
+    library(doParallel)
+    ncores &lt;- makeCluster(detectCores() - 1)
+    registerDoParallel(cores=ncores)
+    getDoParWorkers() # 3    
     
     # use Random Forest method with Cross Validation, 4 folds
-#    myModel &lt;- train(classe ~ .
-#                , data = inTraining
-#                , method = &quot;rf&quot;
-#                , metric = &quot;Accuracy&quot;  # categorical outcome variable so choose accuracy
-#                , preProcess=c(&quot;center&quot;, &quot;scale&quot;) # attempt to improve accuracy by normalising
-#                , trControl=trainControl(method = &quot;cv&quot;
-#                                        , number = 4 # folds of the training data
-#                                        , p= 0.60
-#                                        , allowParallel = TRUE 
-#                                       , seeds=NA # don&#39;t let workers set seed 
-#                                        )
-#                )
-#
-#    save(myModel, file = &quot;myModel.RData&quot;)
-#    # 3:42 .. 3:49 without preProcess
-#    # 3:51 .. 3:58 with preProcess
-#    stopCluster(ncores)
-#}# else {
-#    # Use cached model  
-#    load(file = myModelFilename, verbose = TRUE)
-#}</code></pre>
+    myModel &lt;- train(classe ~ .
+                , data = inTraining
+                , method = &quot;rf&quot;
+                , metric = &quot;Accuracy&quot;  # categorical outcome variable so choose accuracy
+                , preProcess=c(&quot;center&quot;, &quot;scale&quot;) # attempt to improve accuracy by normalising
+                , trControl=trainControl(method = &quot;cv&quot;
+                                        , number = 4 # folds of the training data
+                                        , p= 0.60
+                                        , allowParallel = TRUE 
+                                       , seeds=NA # don&#39;t let workers set seed 
+                                        )
+                )
+
+    save(myModel, file = &quot;myModel.RData&quot;)
+
+    stopCluster(ncores)
+} else {
+    # Use cached model  
+load(file = myModelFilename, verbose = TRUE)
+}</code></pre>
+<pre><code>## Loading objects:
+##   myModel</code></pre>
 <div id="results-and-conclusion" class="section level2">
 <h2>Results and Conclusion</h2>
 <p>We have constructed a model and have achieved cross validation by using the trainControl method set to ‘cv’</p>
-<pre class="r"><code>#print(myModel, digits=4)</code></pre>
+<pre class="r"><code>print(myModel, digits=4)</code></pre>
+<pre><code>## Random Forest 
+## 
+## 11776 samples
+##    52 predictor
+##     5 classes: &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39; 
+## 
+## Pre-processing: centered (52), scaled (52) 
+## Resampling: Cross-Validated (4 fold) 
+## Summary of sample sizes: 8831, 8831, 8834, 8832 
+## Resampling results across tuning parameters:
+## 
+##   mtry  Accuracy  Kappa 
+##    2    0.9872    0.9838
+##   27    0.9882    0.9851
+##   52    0.9817    0.9768
+## 
+## Accuracy was used to select the optimal model using the largest value.
+## The final value used for the model was mtry = 27.</code></pre>
 </div>
 <div id="predict-evaluate-and-test-with-a-confusion-matrix." class="section level2">
 <h2>Predict, Evaluate, and Test with a confusion matrix.</h2>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 2229    7    0    1    0
+##          B    2 1509    6    1    0
+##          C    0    2 1359    8    5
+##          D    0    0    3 1276    6
+##          E    1    0    0    0 1431
+## 
+## Overall Statistics
+##                                           
+##                Accuracy : 0.9946          
+##                  95% CI : (0.9928, 0.9961)
+##     No Information Rate : 0.2845          
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+##                                           
+##                   Kappa : 0.9932          
+##                                           
+##  Mcnemar&#39;s Test P-Value : NA              
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            0.9987   0.9941   0.9934   0.9922   0.9924
+## Specificity            0.9986   0.9986   0.9977   0.9986   0.9998
+## Pos Pred Value         0.9964   0.9941   0.9891   0.9930   0.9993
+## Neg Pred Value         0.9995   0.9986   0.9986   0.9985   0.9983
+## Prevalence             0.2845   0.1935   0.1744   0.1639   0.1838
+## Detection Rate         0.2841   0.1923   0.1732   0.1626   0.1824
+## Detection Prevalence   0.2851   0.1935   0.1751   0.1638   0.1825
+## Balanced Accuracy      0.9986   0.9963   0.9956   0.9954   0.9961</code></pre>
 <p>The out of sample error is 0.14%. The accuracy is quite high at 99.46%. This is definitely within a 95% confidence interval.</p>
 </div>
 <div id="create-a-final-model-for-data-and-all-important-predictors." class="section level2">
 <h2>Create a final model for data and all important predictors.</h2>
+<pre><code>## 
+## Call:
+##  randomForest(x = x, y = y, mtry = min(param$mtry, ncol(x))) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 27
+## 
+##         OOB estimate of  error rate: 0.86%
+## Confusion matrix:
+##      A    B    C    D    E class.error
+## A 3344    2    1    0    1 0.001194743
+## B   20 2251    6    2    0 0.012286090
+## C    0   14 2031    9    0 0.011197663
+## D    0    1   29 1897    3 0.017098446
+## E    0    2    4    7 2152 0.006004619</code></pre>
+<pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E</code></pre>
+<pre><code>## rf variable importance
+## 
+##   only 20 most important variables shown (out of 52)
+## 
+##                      Overall
+## roll_belt            100.000
+## pitch_forearm         61.314
+## yaw_belt              54.425
+## pitch_belt            44.937
+## magnet_dumbbell_z     42.705
+## magnet_dumbbell_y     42.677
+## roll_forearm          40.036
+## accel_dumbbell_y      23.081
+## magnet_dumbbell_x     18.778
+## roll_dumbbell         18.585
+## accel_forearm_x       16.913
+## magnet_belt_z         16.052
+## accel_dumbbell_z      14.119
+## magnet_forearm_z      13.891
+## magnet_belt_y         13.496
+## total_accel_dumbbell  12.884
+## accel_belt_z          12.413
+## gyros_belt_z          11.382
+## yaw_arm               10.311
+## magnet_belt_x          9.237</code></pre>
+<pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E</code></pre>
 <p>27 variables were tested at each split and the reported out of bounds estimated error is quite low at 0.83%. We have sufficient confidence in the prediction model for the 20 test cases.</p>
 </div>
 <div id="section" class="section level2">
