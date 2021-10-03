@@ -56,7 +56,7 @@ download.file(quizUrl,quizFilename)
 ###Data Cleansing
 
 I inspected the data in excel and found a lot of NA, divide by zero, and blank values in the data. So I removed these values.
-```{R Model 1, cache = TRUE}
+```{R Data Cleanse, cache = TRUE}
 training.df     <-read.csv(trainingFilename, na.strings=c("NA","","#DIV/0!"))
 training.df     <-training.df[,colSums(is.na(training.df)) == 0]
 dim(training.df) ;head(training.df,3)
@@ -69,7 +69,7 @@ dim(quiz.df) ;head(quiz.df,3)
 
 I then went abbout removing the non-predictors from the training set. These include the index, subject name, time, and window variables.
 
-```{r Model 2, cache = TRUE}
+```{r Reduce Vars, cache = TRUE}
 Training.df   <-training.df[,-c(1:7)]
 Quiz.df <-quiz.df[,-c(1:7)]
 dim(Training.df)
@@ -81,7 +81,7 @@ dim(Training.nzv)[1]
 
 # Develop an algorithm by partitioning the training data into a training and then a test/validation set.
 
-```{R Algorithm, cache = TRUE}
+```{R Algor, cache = TRUE}
 inTrain     <- createDataPartition(Training.df$classe, p = 0.6, list = FALSE)
 inTraining  <- Training.df[inTrain,]
 inTest      <- Training.df[-inTrain,]
